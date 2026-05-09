@@ -38,8 +38,11 @@ NetAcad Autopilot 是基于 [ingui-n/netacad-solver](https://github.com/ingui-n/
 ### 从 Release 安装
 
 1. 打开 [最新 Release](https://github.com/FLmhp/netacad-autopilot/releases/latest)。
-2. 下载打包好的 `dist.zip` 产物，或者下载源码自行构建。
-3. 解压后，在浏览器扩展管理页中加载其中的 `dist/` 目录。
+2. 下载适合你浏览器的产物：
+   - Chromium 浏览器：`netacad-autopilot-<version>-manifest-v3.crx`
+   - Firefox：`netacad-autopilot-<version>-manifest-v2.xpi`
+   - 未打包版本：`netacad-autopilot-<version>-manifest-v3.zip` 或 `netacad-autopilot-<version>-manifest-v2.zip`
+3. 如果你下载的是 `.zip` 产物，解压后在浏览器扩展管理页中加载其中的扩展目录。
 
 ### 从源码构建
 
@@ -47,10 +50,10 @@ NetAcad Autopilot 是基于 [ingui-n/netacad-solver](https://github.com/ingui-n/
 git clone https://github.com/FLmhp/netacad-autopilot.git
 cd netacad-autopilot
 npm install
-npm run build
+npm run build:release
 ```
 
-构建完成后，将生成的 `dist/` 目录作为未打包扩展加载。
+可发布产物会生成在 `release-artifacts/` 目录中。
 
 ## 使用方式
 
@@ -75,6 +78,7 @@ npm run build
   - `src/background/background.js` - 组件元数据采集
   - `src/popup/popup.js` - 弹窗启动按钮与状态同步
 - 构建产物输出到 `dist/`。
+- 发布产物会以对齐上游风格的文件名输出到 `release-artifacts/`。
 - `src/` 中同时保留了 Manifest V3 与 Manifest V2 元数据。
 
 ## 致谢

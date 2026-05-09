@@ -38,8 +38,11 @@ NetAcad Autopilot is a maintained fork of [ingui-n/netacad-solver](https://githu
 ### Install from release
 
 1. Open the [latest release](https://github.com/FLmhp/netacad-autopilot/releases/latest).
-2. Download the packaged `dist.zip` artifact, or the source archive if you prefer building locally.
-3. Extract the archive and load the unpacked `dist/` folder in your browser's extension manager.
+2. Download the artifact that matches your browser:
+   - Chromium browsers: `netacad-autopilot-<version>-manifest-v3.crx`
+   - Firefox: `netacad-autopilot-<version>-manifest-v2.xpi`
+   - Unpacked builds: `netacad-autopilot-<version>-manifest-v3.zip` or `netacad-autopilot-<version>-manifest-v2.zip`
+3. If you use a `.zip` artifact, extract it and load the unpacked extension folder in your browser's extension manager.
 
 ### Build from source
 
@@ -47,10 +50,10 @@ NetAcad Autopilot is a maintained fork of [ingui-n/netacad-solver](https://githu
 git clone https://github.com/FLmhp/netacad-autopilot.git
 cd netacad-autopilot
 npm install
-npm run build
+npm run build:release
 ```
 
-Then load the generated `dist/` folder as an unpacked extension.
+Release-ready artifacts are generated in `release-artifacts/`.
 
 ## Usage
 
@@ -75,6 +78,7 @@ Then load the generated `dist/` folder as an unpacked extension.
   - `src/background/background.js` - component metadata collection
   - `src/popup/popup.js` - popup start button and live status
 - Build output goes to `dist/`.
+- Release artifacts are packaged into `release-artifacts/` with upstream-style filenames.
 - Both Manifest V3 and Manifest V2 metadata are present in `src/`.
 
 ## Acknowledgements
