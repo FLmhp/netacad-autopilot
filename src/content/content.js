@@ -19,6 +19,7 @@ let lastAutoAttempt = {
   at: 0
 };
 let lastAutoFinalSubmitAt = 0;
+let isAutoFinalSubmitPending = false;
 let autoFlowStatus = 'Idle';
 let pendingAutoSubmit = {
   signature: '',
@@ -52,15 +53,37 @@ const resetPendingAutoSubmit = () => {
     answeredAt: 0
   };
 };
-const activateAutoFlow = (status, delayMs = AUTO_START_DELAY_MS) => {
-  isAutoFlowEnabled = true;
-  autoStartReadyAt = Date.now() + delayMs;
+const resetAutoFinalSubmitState = () => {
+  lastAutoFinalSubmitAt = 0;
+  isAutoFinalSubmitPending = false;
+};
+const resetAutoFlowProgress = () => {
+  autoStartReadyAt = 0;
   lastAutoAttempt = {
-    signature: '',
-    at: 0
+   signature: '',
+   at: 0
   };
   resetPendingAutoSubmit();
+  resetAutoFinalSubmitState();
+};
+const completeAutoFlow = (status = 'Completed. Automation stopped.') => {
+  isAutoFlowEnabled = false;
+  resetAutoFlowProgress();
   setAutoFlowStatus(status);
+};
+const activateAutoFlow = (status, delayMs = AUTO_START_DELAY_MS) => {
+  isAutoFlowEnabled = true;
+  resetAutoFlowProgress();
+  autoStartReadyAt = Date.now() + delayMs;
+  setAutoFlowStatus(status);
+};
+const startAutoFlow = () => {
+  if (isAutoFlowEnabled) {
+   return getAutoFlowState();
+  }
+
+  activateAutoFlow('Waiting 1 second before starting...');
+  return getAutoFlowState();
 };
 const armAutoSubmitFromManualSolve = () => {
   activateAutoFlow('Manual solve detected. Auto submit armed.', AUTO_MANUAL_TRIGGER_DELAY_MS);
@@ -75,9 +98,7 @@ browser.runtime.onMessage.addListener(async (request) => {
   }
 
   if (request?.action === 'startAutoFlow') {
-    activateAutoFlow('Waiting 1 second before starting...');
-
-    return getAutoFlowState();
+    return startAutoFlow();
   }
 
   if (request?.action === 'getAutoFlowStatus') {
@@ -745,25 +766,30 @@ const handleAutoFinalSubmit = () => {
   const confirmExam = getAutoFinalConfirm();
   const submitButton = getAutoFinalSubmitButton();
 
-  if (!confirmExam || !submitButton)
+  if (!confirmExam || !submitButton) {
+    if (isAutoFinalSubmitPending) {
+      completeAutoFlow();
+      return true;
+    }
+
     return false;
+  }
 
   if (!confirmExam.checked) {
     confirmExam.click();
   }
 
+  if (!isSubmitButtonReady(submitButton)) {
+    setAutoFlowStatus('Waiting for final submit button...');
+    return true;
+  }
+
+  setAutoFlowStatus('Submitting final answers...');
+
   if (Date.now() - lastAutoFinalSubmitAt >= AUTO_SUBMIT_RETRY_MS) {
-    setAutoFlowStatus('Submitting final answers...');
     submitButton.click();
     lastAutoFinalSubmitAt = Date.now();
-    isAutoFlowEnabled = false;
-    autoStartReadyAt = 0;
-    lastAutoAttempt = {
-      signature: '',
-      at: 0
-    };
-    resetPendingAutoSubmit();
-    setAutoFlowStatus('Completed. Automation stopped.');
+    isAutoFinalSubmitPending = true;
   }
 
   return true;

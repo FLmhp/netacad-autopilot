@@ -48,6 +48,7 @@ const refreshStatus = async () => {
 
 startButton?.addEventListener('click', async () => {
   setStatus('Starting...');
+  setRunningState(true);
 
   try {
     const tab = await getActiveTab();

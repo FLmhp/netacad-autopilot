@@ -19,6 +19,7 @@ NetAcad Autopilot is a maintained fork of [ingui-n/netacad-solver](https://githu
 
 - Popup-triggered automation with live status feedback
 - Automatic answer selection plus 1-second submit polling to avoid stuck states
+- Repeated **Start** clicks on the same page no longer reset the final-submit flow mid-run
 - Original manual solving still works: click a question or hold `Ctrl` while hovering answers
 - Expanded compatibility for MCQ, matching, dropdown, yes/no, fill-in-the-blank, table, and open-text style components
 - Restart-safe DOM reprocessing to reduce endless rebuild loops after extension reloads
@@ -38,11 +39,13 @@ NetAcad Autopilot is a maintained fork of [ingui-n/netacad-solver](https://githu
 ### Install from release
 
 1. Open the [latest release](https://github.com/FLmhp/netacad-autopilot/releases/latest).
-2. Download the artifact that matches your browser:
-   - Chromium browsers: `netacad-autopilot-<version>-manifest-v3.crx`
-   - Firefox: `netacad-autopilot-<version>-manifest-v2.xpi`
-   - Unpacked builds: `netacad-autopilot-<version>-manifest-v3.zip` or `netacad-autopilot-<version>-manifest-v2.zip`
-3. If you use a `.zip` artifact, extract it and load the unpacked extension folder in your browser's extension manager.
+2. Use the artifact or distribution channel that matches your browser:
+   - Chromium browsers: there is currently **no browser-store build**, because the author has not paid the Google Chrome developer registration fee yet. Use `netacad-autopilot-<version>-manifest-v3.zip` with **Developer mode** -> **Load unpacked**.
+   - Firefox: install the signed `netacad-autopilot-<version>-manifest-v2.xpi` when it is attached to an official release.
+   - Manual packages: `netacad-autopilot-<version>-manifest-v3.zip` or `netacad-autopilot-<version>-manifest-v2.zip`
+3. If you use a `.zip` artifact, extract it first:
+   - Chromium browsers: open the extension manager, enable **Developer mode**, then choose **Load unpacked**.
+   - Firefox: open `about:debugging`, choose **This Firefox**, then use **Load Temporary Add-on** and select the extracted `manifest.json`.
 
 ### Build from source
 
@@ -53,7 +56,15 @@ npm install
 npm run build:release
 ```
 
-Release-ready artifacts are generated in `release-artifacts/`.
+Release-ready artifacts are generated in `release-artifacts/`. Local builds always emit the Manifest V2 / V3 ZIP packages. A signed Firefox `.xpi` is only generated when `REQUIRE_FIREFOX_SIGNING=true`, `FIREFOX_EXTENSION_ID`, `WEB_EXT_API_KEY`, and `WEB_EXT_API_SECRET` are configured.
+
+### Release distribution
+
+- Official tag releases are built by `.github/workflows/release.yml`.
+- There is currently no Chrome Web Store / browser-store release, because the author has not paid the Google Chrome developer registration fee yet.
+- The Manifest V3 ZIP is the current Chromium manual-install package and the future browser-store submission package.
+- GitHub Releases no longer ship a `.crx`, because current Chromium browsers reject external CRX installs with `CRX_REQUIRED_PROOF_MISSING`.
+- The Firefox `.xpi` is produced through Mozilla signing and attached only when the signing credentials are configured for the release workflow.
 
 ## Usage
 
@@ -68,6 +79,7 @@ Release-ready artifacts are generated in `release-artifacts/`.
 ## Current behavior
 
 - The popup shows the current runtime status (`Idle`, `Waiting`, `Answering`, `Submitting`, `Completed`).
+- Repeated **Start** clicks on the same page are ignored while automation is already running, so the final-submit flow keeps its state.
 - Manual solving events can arm the auto-submit pipeline, so you can mix manual triggers with automated progression.
 - The codebase targets current NetAcad DOM patterns, but the platform can still change markup without notice.
 
@@ -78,7 +90,7 @@ Release-ready artifacts are generated in `release-artifacts/`.
   - `src/background/background.js` - component metadata collection
   - `src/popup/popup.js` - popup start button and live status
 - Build output goes to `dist/`.
-- Release artifacts are packaged into `release-artifacts/` with upstream-style filenames.
+- Release artifacts are packaged into `release-artifacts/`; ZIP assets are always local-build safe, and the Firefox XPI is signing-gated.
 - Both Manifest V3 and Manifest V2 metadata are present in `src/`.
 
 ## Acknowledgements
